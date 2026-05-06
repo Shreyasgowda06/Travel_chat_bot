@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Wanderlust AI - Search State</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#003751",
+                        "on-tertiary-container": "#4d2b00",
+                        "tertiary-container": "#de8712",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#0ea5e9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "on-background": "#121c2a",
+                        "surface-container-high": "#dee9fc",
+                        "on-secondary-container": "#004d6a",
+                        "on-surface-variant": "#3e4850",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "surface-tint": "#006591",
+                        "surface-dim": "#d0dbed",
+                        "inverse-surface": "#27313f",
+                        "surface-container": "#e6eeff",
+                        "primary": "#006591",
+                        "tertiary": "#8a5100",
+                        "secondary": "#00668a",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdcbd",
+                        "primary-fixed": "#c9e6ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#2c1600",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#d9e3f6",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-surface": "#121c2a",
+                        "surface-variant": "#d9e3f6",
+                        "surface": "#f8f9ff",
+                        "primary-fixed-dim": "#89ceff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001e2f",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#40c2fd",
+                        "secondary-fixed": "#c4e7ff",
+                        "inverse-primary": "#89ceff",
+                        "outline": "#6e7881",
+                        "background": "#f8f9ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline-variant": "#bec8d2",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+        .scrim-overlay {
+            background: linear-gradient(to top, rgba(18, 28, 42, 0.7) 0%, rgba(18, 28, 42, 0) 100%);
+        }
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-surface text-on-surface font-body-md h-screen overflow-hidden flex flex-col relative antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Immersive Background -->
+<div class="absolute inset-0 z-0">
+<img alt="" class="w-full h-full object-cover opacity-60" data-alt="A breathtaking, immersive landscape of a tranquil Icelandic fjord at twilight. The sky is painted with soft hues of pink, lavender, and deep sky blue, creating a serene, dreamlike atmosphere. A calm body of water reflects the dramatic, snow-capped mountains in the distance. The lighting is soft and diffused, perfectly aligning with a modern, light-mode travel aesthetic characterized by clean whites, sky blues, and muted grays. The scene evokes a deep sense of wanderlust and peaceful exploration." src="https://lh3.googleusercontent.com/aida/ADBb0uiSuQtnjpH5ZqvbW2PZJ3L1dsyUy4FckHVNAGM2BMbLJzf0oIkpkjb-DDGdAz5I3l41nU8z118Ftw00lBf5s69jeeHSOUQzkPeGXQvJQoiwV9z8rZvDf8RNeYjYm3DUaey5cI4DcUoiPCXnyd5JJxhLZpf5m5O4ideH9alqWVHxsjusPWsZeQ9Fa-vIXzjHT0KTPcofBuzQiJKg9oCwCRLq9eOjlkHW8H-rsIBndOIzf22bKa0WJWmiO5Y"/>
+<div class="absolute inset-0 bg-gradient-to-b from-surface/40 via-surface/10 to-surface/90"></div>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-[0_4px_16px_rgba(31,41,55,0.08)]">
+<button class="p-2 text-primary hover:bg-surface-container-high transition-colors rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-title-lg font-title-lg font-bold text-primary">TravelWith AI</h1>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</header>
+<!-- Main Content Canvas (Search Focus Area) -->
+<main class="flex-1 w-full max-w-3xl mx-auto z-10 relative flex flex-col overflow-y-auto justify-start pb-32 pt-20 px-gutter"></main>
+<!-- Search Input Area (Bottom Fixed) -->
+<div class="fixed bottom-20 left-0 w-full z-40 px-gutter pb-4">
+<div class="max-w-3xl mx-auto relative">
+<div class="glass-panel rounded-full shadow-[0_4px_24px_rgba(0,101,145,0.15)] flex items-center p-2 border border-primary-container/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary pl-3 pr-2" data-icon="search">search</span>
+<input autofocus="" class="flex-1 bg-transparent border-none focus:ring-0 text-body-lg font-body-lg text-on-surface placeholder:text-on-surface-variant/50 py-3 px-2 outline-none" placeholder="Where to next?" type="text"/>
+<div class="flex items-center gap-1 pr-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors hidden md:block">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<!-- Fake Cursor Line for structural indication if needed -->
+<div class="absolute left-14 top-1/2 -translate-y-1/2 w-[2px] h-6 bg-primary animate-pulse pointer-events-none"></div>
+</div>
+</div>
+<!-- BottomNavBar (Suppressed due to Search/Active Input State Focus, but keeping structure hidden for transition logic if required by rules, otherwise removed as per 'Semantic Shell Mandate' for focused/transactional intent. User is focused on inputting a search.) -->
+<!-- Applying Contextual Suppression: Hidden during active search typing -->
+
+<script>
+    const input = document.querySelector('input[type="text"]');
+    const sendBtn = document.querySelector('[data-icon="send"]').parentElement;
+    const mainContainer = document.querySelector('main');
+    
+    // Change mic to attach_file for upload
+    const micIcon = document.querySelector('[data-icon="mic"]');
+    if (micIcon) {
+        micIcon.innerText = 'attach_file';
+        micIcon.setAttribute('data-icon', 'attach_file');
+    }
+    const uploadBtn = micIcon ? micIcon.parentElement : null;
+    
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*,.pdf';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    
+    let stagedFile = null;
+    let conversationHistory = [];
+    
+    const inputWrapper = input.parentElement;
+    const fileBadge = document.createElement('div');
+    fileBadge.className = 'absolute -top-8 left-4 bg-surface-variant text-on-surface-variant text-xs px-2 py-1 rounded-md hidden shadow-sm cursor-pointer border border-outline-variant/30';
+    inputWrapper.parentElement.appendChild(fileBadge);
+    
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', () => fileInput.click());
+    }
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            stagedFile = e.target.files[0];
+            fileBadge.innerText = stagedFile.name + " (Click to remove)";
+            fileBadge.style.display = 'block';
+        }
+        updateSendState();
+    });
+    
+    fileBadge.addEventListener('click', () => {
+        stagedFile = null;
+        fileInput.value = '';
+        fileBadge.style.display = 'none';
+        updateSendState();
+    });
+
+    function updateSendState() {
+        sendBtn.disabled = input.value.trim().length === 0 && !stagedFile;
+        sendBtn.style.opacity = sendBtn.disabled ? '0.5' : '1';
+    }
+    input.addEventListener('input', updateSendState);
+    updateSendState();
+    
+    function appendBubble(role, text, isError=false) {
+        const bubble = document.createElement('div');
+        bubble.className = "p-4 rounded-2xl shadow-sm max-w-[85%] animate-[slideUp_0.3s_ease-out] ";
+        
+        if (role === 'user') {
+            bubble.className += "bg-primary text-on-primary self-end ml-auto rounded-br-sm";
+            bubble.innerText = text;
+        } else {
+            if (isError) {
+                bubble.className += "bg-error-container text-error self-start mr-auto rounded-bl-sm";
+                bubble.innerText = text; // Don't parse markdown for errors
+            } else {
+                bubble.className += "glass-panel text-on-surface self-start mr-auto rounded-bl-sm border border-surface-variant/50 prose prose-sm max-w-none prose-headings:text-on-surface prose-a:text-primary";
+                bubble.innerHTML = marked.parse(text);
+            }
+        }
+        
+        const row = document.createElement('div');
+        row.className = "w-full flex mb-4";
+        row.appendChild(bubble);
+        mainContainer.appendChild(row);
+        
+        mainContainer.scrollTo({ top: mainContainer.scrollHeight, behavior: 'smooth' });
+        return bubble;
+    }
+    
+    function appendTypingIndicator() {
+        const bubble = document.createElement('div');
+        bubble.className = "glass-panel text-on-surface p-4 rounded-2xl shadow-sm max-w-[85%] self-start mr-auto rounded-bl-sm border border-surface-variant/50 mb-4 animate-[slideUp_0.3s_ease-out]";
+        bubble.innerHTML = '<div class="flex gap-1 items-center h-6"><div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce"></div><div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 0.2s"></div><div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 0.4s"></div></div>';
+        
+        const row = document.createElement('div');
+        row.className = "w-full flex mb-4 typing-row";
+        row.appendChild(bubble);
+        mainContainer.appendChild(row);
+        mainContainer.scrollTo({ top: mainContainer.scrollHeight, behavior: 'smooth' });
+        return row;
+    }
+
+    async function sendMessage() {
+        if (sendBtn.disabled) return;
+        
+        const text = input.value.trim();
+        const file = stagedFile;
+        
+        input.value = '';
+        stagedFile = null;
+        fileInput.value = '';
+        fileBadge.style.display = 'none';
+        updateSendState();
+        
+        if (text || file) {
+            let userText = text;
+            if (file) {
+                userText = `[Attached File: ${file.name}] ` + text;
+            }
+            appendBubble('user', userText);
+            
+            if (!file) {
+                conversationHistory.push({role: "user", parts: [text]});
+            }
+        }
+        
+        const typingRow = appendTypingIndicator();
+        
+        try {
+            let res;
+            if (file) {
+                const formData = new FormData();
+                formData.append('prompt', text || 'Describe this file');
+                formData.append('image', file);
+                
+                res = await fetch('/vision', {
+                    method: 'POST',
+                    body: formData
+                });
+            } else {
+                res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({messages: conversationHistory})
+                });
+            }
+            
+            const data = await res.json();
+            typingRow.remove();
+            
+            if (!res.ok) {
+                throw new Error(data.reply || data.detail || "Server error");
+            }
+            
+            appendBubble('model', data.reply);
+            
+            if (!file) {
+                conversationHistory.push({role: "model", parts: [data.reply]});
+            }
+        } catch (err) {
+            typingRow.remove();
+            appendBubble('model', err.message, true);
+        }
+    }
+    
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+</script>
+</body>
+</html>
